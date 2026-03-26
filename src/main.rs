@@ -5,7 +5,7 @@ use tracing_subscriber::filter::LevelFilter;
 
 use fluxer_neptunium::{
     model::{
-        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove},
+        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove, Ready},
         id::{
             Id,
             marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
@@ -23,6 +23,15 @@ struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
+    async fn on_ready(&self, _ctx: Context, data: Arc<Ready>) -> Result<(), EventError> {
+        tracing::info!(
+            "Ready! Logged in as {}#{}",
+            data.user.username,
+            data.user.discriminator
+        );
+        Ok(())
+    }
+
     async fn on_message_reaction_add(
         &self,
         ctx: Context,
@@ -90,6 +99,12 @@ async fn main() {
         .with_max_level(LevelFilter::INFO)
         .init();
 
+    #[cfg(feature = "docker")]
+    let config = Config::builder()
+        .add_source(config::File::with_name("/etc/config.json"))
+        .build()
+        .unwrap();
+    #[cfg(not(feature = "docker"))]
     let config = Config::builder()
         .add_source(config::File::with_name("config.json"))
         .build()
