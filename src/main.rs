@@ -5,10 +5,7 @@ use tracing_subscriber::filter::LevelFilter;
 
 use fluxer_neptunium::{
     model::{
-        gateway::payload::incoming::message_reactions_events::{
-            message_reaction_add::MessageReactionAdd,
-            message_reaction_remove::MessageReactionRemove,
-        },
+        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove},
         id::{
             Id,
             marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
