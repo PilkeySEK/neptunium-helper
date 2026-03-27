@@ -403,9 +403,9 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "fluxer-neptunium"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7903bba8924685b8815f6ed0dd3e8bd35181473d2f47b27dffc55e722c410557"
+checksum = "a5d2bd48df07de8d46b0a83efde1286cf30cd5bcde29a7204b249569f92b9734"
 dependencies = [
  "async-trait",
  "bon",
@@ -1029,9 +1029,9 @@ dependencies = [
 
 [[package]]
 name = "neptunium-gateway"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cb759339b8dff133595d86955f13063d9563b1a5f9ad7c611a91be80ca72ff7"
+checksum = "148a7e0aea16d62adffc7a9b8b78dd8ee1797aa535eea761ba47bf4a1935c614"
 dependencies = [
  "bon",
  "futures-util",
@@ -1058,9 +1058,9 @@ dependencies = [
 
 [[package]]
 name = "neptunium-http"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e81dcae4669c95c20705d2a02ccd84931cefe037e544e815a88f0c9b0fe37796"
+checksum = "250f4f8459c562d2442ab240e9618e35565e17c5618492da2fa81404ab133168"
 dependencies = [
  "async-trait",
  "bon",
@@ -1079,9 +1079,9 @@ dependencies = [
 
 [[package]]
 name = "neptunium-model"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "254650dd13b74a9837cbdbc73d0ce5b7f98ac3b8694d1487259ac6b65d6dd6d2"
+checksum = "5a7bffc8e7722251d7b36ea7d0899d921188f9be418bae034997a1f67fc7507e"
 dependencies = [
  "bitflags",
  "bon",
