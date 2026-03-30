@@ -5,14 +5,19 @@ use tracing_subscriber::filter::LevelFilter;
 
 use fluxer_neptunium::{
     model::{
-        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove, Ready},
+        gateway::payload::incoming::{
+            MessageCreate, MessageReactionAdd, MessageReactionRemove, Ready,
+        },
         id::{
             Id,
             marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
         },
+        time::OffsetDateTime,
     },
     prelude::*,
 };
+
+const PREFIX: &str = "n?";
 
 struct Handler {
     guild_id: Id<GuildMarker>,
@@ -29,6 +34,24 @@ impl EventHandler for Handler {
             data.user.username,
             data.user.discriminator
         );
+        Ok(())
+    }
+
+    async fn on_message_create(
+        &self,
+        ctx: Context,
+        message: Arc<MessageCreate>,
+    ) -> Result<(), EventError> {
+        // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
+        if !message.author.bot && message.content == format!("{PREFIX}ping") {
+            let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
+            message
+                .reply(
+                    &ctx,
+                    format!("Pong! Latency: {} ms", latency.whole_milliseconds()),
+                )
+                .await?;
+        }
         Ok(())
     }
 
