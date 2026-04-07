@@ -4,10 +4,9 @@ use config::Config;
 use tracing_subscriber::filter::LevelFilter;
 
 use fluxer_neptunium::{
+    cached_payload::{CachedMessageCreate, CachedReady},
     model::{
-        gateway::payload::incoming::{
-            MessageCreate, MessageReactionAdd, MessageReactionRemove, Ready,
-        },
+        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove},
         id::{
             Id,
             marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
@@ -28,11 +27,12 @@ struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn on_ready(&self, _ctx: Context, data: Arc<Ready>) -> Result<(), EventError> {
+    async fn on_ready(&self, _ctx: Context, data: Arc<CachedReady>) -> Result<(), EventError> {
+        let user = data.user.load();
         tracing::info!(
             "Ready! Logged in as {}#{}",
-            data.user.username,
-            data.user.discriminator
+            user.username,
+            user.discriminator
         );
         Ok(())
     }
@@ -40,10 +40,12 @@ impl EventHandler for Handler {
     async fn on_message_create(
         &self,
         ctx: Context,
-        message: Arc<MessageCreate>,
+        event: Arc<CachedMessageCreate>,
     ) -> Result<(), EventError> {
+        let message = event.load();
+        let author = message.author.load();
         // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
-        if !message.author.bot && message.content == format!("{PREFIX}ping") {
+        if !author.bot && message.content == format!("{PREFIX}ping") {
             let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
             message
                 .reply(
