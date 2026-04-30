@@ -4,9 +4,11 @@ use config::Config;
 use tracing_subscriber::filter::LevelFilter;
 
 use fluxer_neptunium::{
-    cached_payload::{CachedMessageCreate, CachedReady},
+    cached_payload::{
+        CachedMessageCreate, CachedMessageReactionAdd, CachedMessageReactionRemove, CachedReady,
+    },
     model::{
-        gateway::payload::incoming::{MessageReactionAdd, MessageReactionRemove},
+        guild::Emoji,
         id::{
             Id,
             marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
@@ -60,7 +62,7 @@ impl EventHandler for Handler {
     async fn on_message_reaction_add(
         &self,
         ctx: Context,
-        reaction: Arc<MessageReactionAdd>,
+        reaction: Arc<CachedMessageReactionAdd>,
     ) -> Result<(), EventError> {
         let Some(guild_id) = reaction.guild_id else {
             // Reaction was added outside of a guild (DMs).
@@ -72,11 +74,10 @@ impl EventHandler for Handler {
         if reaction.message_id != self.message_id {
             return Ok(());
         }
-        let Some(emoji_id) = reaction.emoji.id else {
-            // Reaction is unicode.
+        let Emoji::Custom { id: emoji_id, .. } = &reaction.emoji else {
             return Ok(());
         };
-        if emoji_id != self.emoji_id {
+        if *emoji_id != self.emoji_id {
             return Ok(());
         }
 
@@ -90,7 +91,7 @@ impl EventHandler for Handler {
     async fn on_message_reaction_remove(
         &self,
         ctx: Context,
-        reaction: Arc<MessageReactionRemove>,
+        reaction: Arc<CachedMessageReactionRemove>,
     ) -> Result<(), EventError> {
         let Some(guild_id) = reaction.guild_id else {
             // Reaction was removed outside of a guild (DMs).
@@ -102,11 +103,10 @@ impl EventHandler for Handler {
         if reaction.message_id != self.message_id {
             return Ok(());
         }
-        let Some(emoji_id) = reaction.emoji.id else {
-            // Reaction is unicode.
+        let Emoji::Custom { id: emoji_id, .. } = &reaction.emoji else {
             return Ok(());
         };
-        if emoji_id != self.emoji_id {
+        if *emoji_id != self.emoji_id {
             return Ok(());
         }
 
