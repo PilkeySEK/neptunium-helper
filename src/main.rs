@@ -1,4 +1,7 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use config::Config;
 use tracing_subscriber::filter::LevelFilter;
@@ -7,6 +10,7 @@ use fluxer_neptunium::{
     cached_payload::{
         CachedMessageCreate, CachedMessageReactionAdd, CachedMessageReactionRemove, CachedReady,
     },
+    http::endpoints::channel::EditMessageBody,
     model::{
         guild::Emoji,
         id::{
@@ -49,10 +53,25 @@ impl EventHandler for Handler {
         // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
         if !author.bot && message.content == format!("{PREFIX}ping") {
             let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
-            message
+            let reply_start_time = Instant::now();
+            let reply = message
                 .reply(
                     &ctx,
                     format!("Pong! Latency: {} ms", latency.whole_milliseconds()),
+                )
+                .await?;
+            let reply_end_time = Instant::now();
+            let reply = reply.load();
+            reply
+                .edit(
+                    &ctx,
+                    EditMessageBody::builder()
+                        .content(format!(
+                            "{}\nMessage send latency: {} ms",
+                            reply.content,
+                            (reply_end_time - reply_start_time).as_millis()
+                        ))
+                        .build(),
                 )
                 .await?;
         }
