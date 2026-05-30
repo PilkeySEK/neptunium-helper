@@ -1,7 +1,4 @@
-use std::{
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use std::{sync::Arc, time::Instant};
 
 use config::Config;
 use tracing_subscriber::filter::LevelFilter;
@@ -168,6 +165,7 @@ async fn main() {
         role_id,
     });
 
+    /*
     loop {
         if let Err(e) = client.start().await {
             tracing::error!(%e, "Client error, waiting 1 minute, then trying again.");
@@ -178,5 +176,9 @@ async fn main() {
             tracing::info!("Client exited successfully.");
             break;
         }
+    }
+    */
+    if let Err(e) = client.start().await {
+        tracing::error!("Fatal client error: {e}");
     }
 }
