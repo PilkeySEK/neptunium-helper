@@ -12,12 +12,16 @@ use fluxer_neptunium::{
         guild::Emoji,
         id::{
             Id,
-            marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
+            marker::{ChannelMarker, EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
         },
         time::OffsetDateTime,
     },
     prelude::*,
 };
+
+use crate::counting::CountingManager;
+
+mod counting;
 
 const PREFIX: &str = "n?";
 
@@ -26,6 +30,8 @@ struct Handler {
     message_id: Id<MessageMarker>,
     emoji_id: Id<EmojiMarker>,
     role_id: Id<RoleMarker>,
+    counting_channel: Id<ChannelMarker>,
+    counting_manager: CountingManager,
 }
 
 #[async_trait]
@@ -47,8 +53,14 @@ impl EventHandler for Handler {
     ) -> Result<(), EventError> {
         let message = event.load();
         let author = message.author.load();
+        if author.bot {
+            return Ok(());
+        }
+        if message.channel_id == self.counting_channel {
+            return self.counting_manager.handle_message(ctx, event).await;
+        }
         // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
-        if !author.bot && message.content == format!("{PREFIX}ping") {
+        if message.content == format!("{PREFIX}ping") {
             let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
             let reply_start_time = Instant::now();
             let reply = message
@@ -155,6 +167,7 @@ async fn main() {
     let message_id = Id::new(config.get_int("message_id").unwrap() as u64);
     let emoji_id = Id::new(config.get_int("emoji_id").unwrap() as u64);
     let role_id = Id::new(config.get_int("role_id").unwrap() as u64);
+    let counting_channel = Id::new(config.get_int("counting_channel").unwrap() as u64);
 
     let mut client = Client::new(ShardConfig::builder().token(token).build());
 
@@ -163,6 +176,8 @@ async fn main() {
         message_id,
         emoji_id,
         role_id,
+        counting_channel,
+        counting_manager: CountingManager::new(),
     });
 
     /*

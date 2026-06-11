@@ -3,5 +3,6 @@
   "guild_id": "",
   "message_id": "",
   "emoji_id": "",
-  "role_id": ""
+  "role_id": "",
+  "counting_channel": ""
 }

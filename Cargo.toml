@@ -5,7 +5,10 @@ edition = "2024"
 
 [dependencies]
 config = { version = "0.15.22", features = ["json"] }
-fluxer-neptunium = { git = "https://github.com/PilkeySEK/fluxer-neptunium.git", branch = "client-refactor" }
+fluxer-neptunium = { git = "https://github.com/PilkeySEK/fluxer-neptunium.git", features = [
+    "experimental-macros",
+] }
+meval = "0.2.0"
 tokio = { version = "1.50.0", features = ["rt-multi-thread"] }
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
