@@ -7,6 +7,7 @@ use fluxer_neptunium::{
     cached_payload::{
         CachedMessageCreate, CachedMessageReactionAdd, CachedMessageReactionRemove, CachedReady,
     },
+    create_embed,
     http::endpoints::channel::EditMessageBody,
     model::{
         guild::Emoji,
@@ -36,13 +37,22 @@ struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn on_ready(&self, _ctx: Context, data: Arc<CachedReady>) -> Result<(), EventError> {
+    async fn on_ready(&self, ctx: Context, data: Arc<CachedReady>) -> Result<(), EventError> {
         let user = data.user.load();
         tracing::info!(
             "Ready! Logged in as {}#{}",
             user.username,
             user.discriminator
         );
+        self.counting_channel
+            .send_message(
+                &ctx,
+                create_embed!(
+                    description: "Bot is started, the next number is `1`.",
+                    color: 0xffffff,
+                ),
+            )
+            .await?;
         Ok(())
     }
 
