@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use evalexpr::{DefaultNumericTypes, EmptyContextWithBuiltinFunctions};
 use fluxer_neptunium::{
     cached_payload::CachedMessageCreate,
     create_embed,
@@ -12,6 +13,7 @@ use tokio::sync::Mutex;
 pub struct CountingManager {
     count: Mutex<u64>,
     last_counted: Mutex<Option<Id<UserMarker>>>,
+    context: EmptyContextWithBuiltinFunctions<DefaultNumericTypes>,
 }
 
 impl CountingManager {
@@ -19,6 +21,7 @@ impl CountingManager {
         Self {
             count: Mutex::new(0),
             last_counted: Mutex::new(None),
+            context: EmptyContextWithBuiltinFunctions::default(),
         }
     }
 
@@ -51,8 +54,16 @@ impl CountingManager {
             return Ok(());
         }
 
-        let Ok(parsed) = meval::eval_str(&event.message.content) else {
-            return Ok(());
+        // let Ok(parsed) = evalexpr::eval_number_with_context(&event.message.content, &self.context) else {
+        //     return Ok(());
+        // };
+        let parsed = match evalexpr::eval_number_with_context(&event.message.content, &self.context)
+        {
+            Ok(parsed) => parsed,
+            Err(e) => {
+                tracing::error!("{e}");
+                return Ok(());
+            }
         };
 
         let parsed = parsed.round();
