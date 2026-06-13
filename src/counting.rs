@@ -54,17 +54,18 @@ impl CountingManager {
             return Ok(());
         }
 
-        // let Ok(parsed) = evalexpr::eval_number_with_context(&event.message.content, &self.context) else {
-        //     return Ok(());
-        // };
-        let parsed = match evalexpr::eval_number_with_context(&event.message.content, &self.context)
-        {
-            Ok(parsed) => parsed,
-            Err(e) => {
-                tracing::error!("{e}");
-                return Ok(());
-            }
+        let Ok(parsed) = evalexpr::eval_number_with_context(&event.message.content, &self.context)
+        else {
+            return Ok(());
         };
+        // let parsed = match evalexpr::eval_number_with_context(&event.message.content, &self.context)
+        // {
+        //     Ok(parsed) => parsed,
+        //     Err(e) => {
+        //         tracing::error!("{e}");
+        //         return Ok(());
+        //     }
+        // };
 
         let parsed = parsed.round();
 
