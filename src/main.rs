@@ -67,9 +67,9 @@ impl EventHandler for Handler {
         if author.bot {
             return Ok(());
         }
-        if message.channel_id == self.counting_channel {
+        /*if message.channel_id == self.counting_channel {
             return self.counting_manager.handle_message(ctx, event).await;
-        }
+        }*/
         // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
         if message.content == format!("{PREFIX}ping") {
             let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
