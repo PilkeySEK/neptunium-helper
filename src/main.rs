@@ -159,6 +159,14 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
+
+    if let Err(e) = dotenvy::dotenv() {
+        println!("{e}");
+    }
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(

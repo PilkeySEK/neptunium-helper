@@ -4,15 +4,21 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-config = { version = "0.15.22", features = ["json"] }
+config = { version = "0.15.24", features = ["json"] }
+dotenvy = "0.15.7"
 evalexpr = "13.1.0"
 fluxer-neptunium = { git = "https://github.com/PilkeySEK/fluxer-neptunium.git", features = [
     "experimental-macros",
 ] }
-tokio = { version = "1.50.0", features = ["rt-multi-thread"] }
+rustls = { version = "0.23.41", features = ["ring"] }
+tokio = { version = "1.52.3", features = ["rt-multi-thread"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 [features]
 default = []
 docker = []
+
+[[bin]]
+name = "app"
+path = "src/main.rs"
