@@ -45,7 +45,7 @@ impl EventHandler for Handler {
             user.username,
             user.discriminator
         );
-        self.counting_channel
+        /*self.counting_channel
             .send_message(
                 &ctx,
                 create_embed!(
@@ -53,7 +53,7 @@ impl EventHandler for Handler {
                     color: 0xffffff,
                 ),
             )
-            .await?;
+            .await?;*/
         Ok(())
     }
 
