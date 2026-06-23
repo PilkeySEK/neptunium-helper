@@ -1,7 +1,8 @@
 use std::{sync::Arc, time::Instant};
 
 use config::Config;
-use tracing_subscriber::filter::LevelFilter;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use fluxer_neptunium::{
     cached_payload::{
@@ -158,8 +159,13 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_max_level(LevelFilter::DEBUG)
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(LevelFilter::DEBUG.into())
+                .from_env_lossy(),
+        )
         .init();
 
     #[cfg(feature = "docker")]
