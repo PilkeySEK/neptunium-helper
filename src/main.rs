@@ -1,6 +1,7 @@
 use std::{sync::Arc, time::Instant};
 
-use config::Config;
+use color_eyre::eyre::Context as _;
+use serde::Deserialize;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -8,37 +9,40 @@ use fluxer_neptunium::{
     cached_payload::{
         CachedMessageCreate, CachedMessageReactionAdd, CachedMessageReactionRemove, CachedReady,
     },
-    create_embed,
     http::endpoints::channel::EditMessageBody,
     model::{
         guild::Emoji,
         id::{
             Id,
-            marker::{ChannelMarker, EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
+            marker::{EmojiMarker, GuildMarker, MessageMarker, RoleMarker},
         },
         time::OffsetDateTime,
     },
     prelude::*,
 };
 
-use crate::counting::CountingManager;
-
-mod counting;
+// mod counting;
 
 const PREFIX: &str = "n?";
 
-struct Handler {
+#[derive(Deserialize)]
+struct Config {
+    token: String,
     guild_id: Id<GuildMarker>,
     message_id: Id<MessageMarker>,
     emoji_id: Id<EmojiMarker>,
     role_id: Id<RoleMarker>,
-    counting_channel: Id<ChannelMarker>,
-    counting_manager: CountingManager,
+}
+
+struct Handler {
+    config: Config,
+    // counting_channel: Id<ChannelMarker>,
+    // counting_manager: CountingManager,
 }
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn on_ready(&self, ctx: Context, data: Arc<CachedReady>) -> Result<(), EventError> {
+    async fn on_ready(&self, _ctx: Context, data: Arc<CachedReady>) -> Result<(), EventError> {
         let user = data.user.load();
         tracing::info!(
             "Ready! Logged in as {}#{}",
@@ -46,14 +50,14 @@ impl EventHandler for Handler {
             user.discriminator
         );
         /*self.counting_channel
-            .send_message(
-                &ctx,
-                create_embed!(
-                    description: "Bot is started, the next number is `1`.",
-                    color: 0xffffff,
-                ),
-            )
-            .await?;*/
+        .send_message(
+            &ctx,
+            create_embed!(
+                description: "Bot is started, the next number is `1`.",
+                color: 0xffffff,
+            ),
+        )
+        .await?;*/
         Ok(())
     }
 
@@ -107,21 +111,21 @@ impl EventHandler for Handler {
             // Reaction was added outside of a guild (DMs).
             return Ok(());
         };
-        if guild_id != self.guild_id {
+        if guild_id != self.config.guild_id {
             return Ok(());
         }
-        if reaction.message_id != self.message_id {
+        if reaction.message_id != self.config.message_id {
             return Ok(());
         }
         let Emoji::Custom { id: emoji_id, .. } = &reaction.emoji else {
             return Ok(());
         };
-        if *emoji_id != self.emoji_id {
+        if *emoji_id != self.config.emoji_id {
             return Ok(());
         }
 
         guild_id
-            .add_role_to_member(&ctx, reaction.user_id, self.role_id)
+            .add_role_to_member(&ctx, reaction.user_id, self.config.role_id)
             .await?;
 
         Ok(())
@@ -136,21 +140,21 @@ impl EventHandler for Handler {
             // Reaction was removed outside of a guild (DMs).
             return Ok(());
         };
-        if guild_id != self.guild_id {
+        if guild_id != self.config.guild_id {
             return Ok(());
         }
-        if reaction.message_id != self.message_id {
+        if reaction.message_id != self.config.message_id {
             return Ok(());
         }
         let Emoji::Custom { id: emoji_id, .. } = &reaction.emoji else {
             return Ok(());
         };
-        if *emoji_id != self.emoji_id {
+        if *emoji_id != self.config.emoji_id {
             return Ok(());
         }
 
         guild_id
-            .remove_role_from_member(&ctx, reaction.user_id, self.role_id)
+            .remove_role_from_member(&ctx, reaction.user_id, self.config.role_id)
             .await?;
 
         Ok(())
@@ -158,7 +162,7 @@ impl EventHandler for Handler {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> color_eyre::Result {
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
@@ -176,48 +180,22 @@ async fn main() {
         )
         .init();
 
-    #[cfg(feature = "docker")]
-    let config = Config::builder()
-        .add_source(config::File::with_name("/etc/config.json"))
-        .build()
-        .unwrap();
-    #[cfg(not(feature = "docker"))]
-    let config = Config::builder()
-        .add_source(config::File::with_name("config.json"))
-        .build()
-        .unwrap();
-    let token = config.get_string("token").unwrap();
-    let guild_id = Id::new(config.get_int("guild_id").unwrap() as u64);
-    let message_id = Id::new(config.get_int("message_id").unwrap() as u64);
-    let emoji_id = Id::new(config.get_int("emoji_id").unwrap() as u64);
-    let role_id = Id::new(config.get_int("role_id").unwrap() as u64);
-    let counting_channel = Id::new(config.get_int("counting_channel").unwrap() as u64);
+    let config_file_path = if cfg!(feature = "docker") {
+        "/etc/config.json"
+    } else {
+        "config.json"
+    };
 
-    let mut client = Client::new(ShardConfig::builder().token(token).build());
+    let config = tokio::fs::read_to_string(config_file_path)
+        .await
+        .wrap_err_with(|| format!("Error reading config file at {config_file_path}"))?;
+    let config: Config = serde_json::from_str(&config)
+        .wrap_err_with(|| format!("Error parsing config file from {config_file_path}"))?;
 
-    client.register_event_handler(Handler {
-        guild_id,
-        message_id,
-        emoji_id,
-        role_id,
-        counting_channel,
-        counting_manager: CountingManager::new(),
-    });
+    let mut client = Client::new(&config.token);
 
-    /*
-    loop {
-        if let Err(e) = client.start().await {
-            tracing::error!(%e, "Client error, waiting 1 minute, then trying again.");
+    client.register_event_handler(Handler { config });
 
-            tokio::time::sleep(Duration::from_mins(1)).await;
-        } else {
-            // Currently, this can't happen without an error, but I'll add it anyway.
-            tracing::info!("Client exited successfully.");
-            break;
-        }
-    }
-    */
-    if let Err(e) = client.start().await {
-        tracing::error!("Fatal client error: {e}");
-    }
+    client.start().await.wrap_err("Fatal client error")?;
+    Ok(())
 }
