@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Instant};
+use std::sync::Arc;
 
 use color_eyre::eyre::Context as _;
 use serde::Deserialize;
@@ -9,7 +9,7 @@ use fluxer_neptunium::{
     cached_payload::{
         CachedMessageCreate, CachedMessageReactionAdd, CachedMessageReactionRemove, CachedReady,
     },
-    http::endpoints::channel::EditMessageBody,
+    create_embed,
     model::{
         guild::Emoji,
         id::{
@@ -24,6 +24,7 @@ use fluxer_neptunium::{
 // mod counting;
 
 const PREFIX: &str = "n?";
+const GIT_HASH: Option<&str> = option_env!("GIT_HASH");
 
 #[derive(Deserialize)]
 struct Config {
@@ -77,25 +78,16 @@ impl EventHandler for Handler {
         // I know this format!() can be optimized and is not really great, would be fixed by a real command parser
         if message.content == format!("{PREFIX}ping") {
             let latency = OffsetDateTime::now_utc() - OffsetDateTime::from(message.timestamp);
-            let reply_start_time = Instant::now();
-            let reply = message
+            message
                 .reply(
                     &ctx,
-                    format!("Pong! Latency: {} ms", latency.whole_milliseconds()),
-                )
-                .await?;
-            let reply_end_time = Instant::now();
-            let reply = reply.load();
-            reply
-                .edit(
-                    &ctx,
-                    EditMessageBody::builder()
-                        .content(format!(
-                            "{}\nMessage send latency: {} ms",
-                            reply.content,
-                            (reply_end_time - reply_start_time).as_millis()
-                        ))
-                        .build(),
+                    create_embed!(
+                        title: "Pong!",
+                        description: format!("Latency: {} ms", latency.whole_milliseconds()),
+                        footer: {
+                            text: GIT_HASH.unwrap_or("unknown git commit"),
+                        },
+                    ),
                 )
                 .await?;
         }
