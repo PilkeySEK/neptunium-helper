@@ -24,7 +24,17 @@ use fluxer_neptunium::{
 // mod counting;
 
 const PREFIX: &str = "n?";
-const GIT_HASH: Option<&str> = option_env!("GIT_HASH");
+const GIT_HASH: &str = {
+    if let Some(hash) = option_env!("GIT_HASH") {
+        if hash.is_empty() {
+            "unknown git commit"
+        } else {
+            hash
+        }
+    } else {
+        "unknown git commit"
+    }
+};
 
 #[derive(Deserialize)]
 struct Config {
@@ -85,7 +95,7 @@ impl EventHandler for Handler {
                         title: "Pong!",
                         description: format!("Latency: {} ms", latency.whole_milliseconds()),
                         footer: {
-                            text: GIT_HASH.unwrap_or("unknown git commit"),
+                            text: GIT_HASH,
                         },
                     ),
                 )
