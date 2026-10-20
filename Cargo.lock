@@ -442,6 +442,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
+name = "either"
+version = "1.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e9c71c2167ca323c882b99918929403426e2373ea17242ff5653e0d5e1058be"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "errno"
 version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -491,8 +500,8 @@ checksum = "ef25905e51abafe4dcea6c15fec58c57b601cdbd0ee53d22ea1d3016c587d39b"
 
 [[package]]
 name = "fluxer-neptunium"
-version = "0.7.3"
-source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git#46a764dc412f086204b12906d988e5905a655372"
+version = "0.8.2"
+source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git?branch=hideous#c53e8419cd8dad3d79f4afc1301d04c5ad90bda1"
 dependencies = [
  "async-trait",
  "bon",
@@ -1081,8 +1090,8 @@ dependencies = [
 
 [[package]]
 name = "neptunium-cache-inmemory"
-version = "0.7.3"
-source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git#46a764dc412f086204b12906d988e5905a655372"
+version = "0.8.2"
+source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git?branch=hideous#c53e8419cd8dad3d79f4afc1301d04c5ad90bda1"
 dependencies = [
  "arc-swap",
  "async-trait",
@@ -1098,8 +1107,8 @@ dependencies = [
 
 [[package]]
 name = "neptunium-gateway"
-version = "0.7.3"
-source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git#46a764dc412f086204b12906d988e5905a655372"
+version = "0.8.2"
+source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git?branch=hideous#c53e8419cd8dad3d79f4afc1301d04c5ad90bda1"
 dependencies = [
  "bon",
  "futures-util",
@@ -1134,8 +1143,8 @@ dependencies = [
 
 [[package]]
 name = "neptunium-http"
-version = "0.7.3"
-source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git#46a764dc412f086204b12906d988e5905a655372"
+version = "0.8.2"
+source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git?branch=hideous#c53e8419cd8dad3d79f4afc1301d04c5ad90bda1"
 dependencies = [
  "bon",
  "hashbrown 0.17.1",
@@ -1144,8 +1153,10 @@ dependencies = [
  "reqwest",
  "serde",
  "serde-bool",
+ "serde-constant",
  "serde_json",
  "serde_path_to_error",
+ "serde_qs",
  "serde_repr",
  "tokio",
  "tokio-util",
@@ -1155,11 +1166,12 @@ dependencies = [
 
 [[package]]
 name = "neptunium-model"
-version = "0.7.3"
-source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git#46a764dc412f086204b12906d988e5905a655372"
+version = "0.8.2"
+source = "git+https://github.com/PilkeySEK/fluxer-neptunium.git?branch=hideous#c53e8419cd8dad3d79f4afc1301d04c5ad90bda1"
 dependencies = [
  "bitflags",
  "bon",
+ "either",
  "language-tags",
  "serde",
  "serde-bool",
@@ -1713,6 +1725,15 @@ name = "serde-bool"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "034ca3364d3fb1aae01394836ebc846ec0469346c4e7a6271d16703c7bf5e3ff"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "serde-constant"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "301d0de95fe56444b1ea1ee62363452b756fe715fb4eab505be16b906599b47e"
 dependencies = [
  "serde",
 ]

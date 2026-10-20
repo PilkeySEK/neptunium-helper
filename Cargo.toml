@@ -7,7 +7,7 @@ edition = "2024"
 color-eyre = "0.6.5"
 dotenvy = "0.15.7"
 evalexpr = "13.1.0"
-fluxer-neptunium = { git = "https://github.com/PilkeySEK/fluxer-neptunium.git", features = [
+fluxer-neptunium = { git = "https://github.com/PilkeySEK/fluxer-neptunium.git", branch = "hideous", features = [
     "experimental-macros",
 ] }
 rustls = { version = "0.23.41", features = ["ring"] }
