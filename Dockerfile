@@ -2,7 +2,9 @@ FROM rust:latest AS build
 
 WORKDIR /app
 
-RUN --mount=type=bind,source=src,target=src \
+RUN apt-get install git
+
+RUN GIT_HASH=$(git rev-parse HEAD) --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     --mount=type=cache,target=/app/target/ \
