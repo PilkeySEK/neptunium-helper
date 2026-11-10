@@ -182,11 +182,7 @@ async fn main() -> color_eyre::Result<Infallible> {
         )
         .init();
 
-    let config_file_path = if cfg!(feature = "docker") {
-        "/etc/config.json"
-    } else {
-        "config.json"
-    };
+    let config_file_path = "config.json";
 
     let config = tokio::fs::read_to_string(config_file_path)
         .await

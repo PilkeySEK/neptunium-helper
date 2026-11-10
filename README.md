@@ -6,4 +6,4 @@ Currently, the bot only supports a message that when reacted to with the right e
 
 # How to run it yourself (why?)
 
-You can run this bot yourself by copying `config.example.json` to `example.json` and filling in the fields, then use `cargo run`.
+You can run this bot yourself by copying `config.example.json` to `config.json` and filling in the fields, then use `cargo run`.
