@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{convert::Infallible, sync::Arc};
 
 use color_eyre::eyre::Context as _;
 use serde::Deserialize;
@@ -164,7 +164,7 @@ impl EventHandler for Handler {
 }
 
 #[tokio::main]
-async fn main() -> color_eyre::Result {
+async fn main() -> color_eyre::Result<Infallible> {
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
@@ -194,10 +194,11 @@ async fn main() -> color_eyre::Result {
     let config: Config = serde_json::from_str(&config)
         .wrap_err_with(|| format!("Error parsing config file from {config_file_path}"))?;
 
-    let mut client = Client::new(&config.token);
+    let mut client = Client::new(&config.token)
+        .await
+        .wrap_err("Failed to create client")?;
 
     client.register_event_handler(Handler { config });
 
-    client.start().await.wrap_err("Fatal client error")?;
-    Ok(())
+    client.start().await.wrap_err("Fatal client error")
 }
