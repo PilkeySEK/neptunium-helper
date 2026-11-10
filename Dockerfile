@@ -4,6 +4,8 @@ WORKDIR /app
 
 RUN apt-get install git
 
+COPY .git .
+
 RUN GIT_HASH=$(git rev-parse HEAD) --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
